@@ -3,6 +3,8 @@ use std::env;
 fn main() {
     let args: Vec<String> = env::args().skip(1).collect();
 
+    let todo = ToDo::new().expect("Unable to create todo struct");
+
     if !args.is_empty() {
         let command = &args[0];
 

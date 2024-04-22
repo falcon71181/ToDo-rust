@@ -1,5 +1,5 @@
 use std::fs::File;
-use std::io::Read;
+use std::io::{BufRead, BufReader};
 use std::path::Path;
 use std::path::PathBuf;
 use xdg::BaseDirectories;
@@ -33,13 +33,16 @@ impl ToDo {
         }
 
         // Read contents of todo.lst
-        let mut todo_file = File::open(&todo_path).expect("Failed to open todo.lst");
-        let mut todo_lst = String::new();
-        todo_file
-            .read_to_string(&mut todo_lst)
-            .expect("Failed to read todo.lst");
+        let todo_file = File::open(&todo_path).expect("Failed to open todo.lst");
+        let buffer_reader = BufReader::new(&todo_file);
+        let mut todo: Vec<String> = vec![];
 
-        let todo: Vec<String> = todo_lst.lines().map(String::from).collect();
+        for line in buffer_reader.lines() {
+            if line.is_ok() {
+                todo.push(line.unwrap());
+            }
+        }
+
         println!("{:?}", todo);
 
         Ok(Self {

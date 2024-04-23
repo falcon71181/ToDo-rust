@@ -1,4 +1,5 @@
 use std::env;
+use todo::ToDo;
 
 fn main() {
     let args: Vec<String> = env::args().skip(1).collect();
@@ -12,7 +13,7 @@ fn main() {
             "list" | "list-all" => println!("List all command"),
             "list-done" => println!("List done command"),
             "list-undone" => println!("List undone command"),
-            "add" => println!("Add command"),
+            "add" => todo.add(&args[1..]),
             "rm" => println!("Remove command"),
             "rm-all" => println!("Remove all command"),
             "done" => println!("Done command"),

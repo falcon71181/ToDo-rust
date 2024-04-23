@@ -1,7 +1,8 @@
-use std::fs::File;
-use std::io::{BufRead, BufReader};
+use std::fs::{File, OpenOptions};
+use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::path::Path;
 use std::path::PathBuf;
+use std::process::exit;
 use xdg::BaseDirectories;
 
 pub struct ToDo {
@@ -12,7 +13,7 @@ pub struct ToDo {
 
 impl ToDo {
     pub fn new() -> Result<Self, String> {
-        let xdg_dir = BaseDirectories::with_prefix("ToDo").expect("Failed to get XDG directories");
+        let xdg_dir = BaseDirectories::with_prefix("ToDo").expect("Failed to get XDG directories.");
 
         let config_path = xdg_dir
             .place_config_file("config.ini")
@@ -33,7 +34,8 @@ impl ToDo {
         }
 
         // Read contents of todo.lst
-        let todo_file = File::open(&todo_path).expect("Failed to open todo.lst");
+        // BUG: OpenOptions::new() not working here
+        let todo_file = File::open(&todo_path).expect("Failed to open todo.lst.");
         let buffer_reader = BufReader::new(&todo_file);
         let mut todo: Vec<String> = vec![];
 
@@ -43,12 +45,40 @@ impl ToDo {
             }
         }
 
-        println!("{:?}", todo);
-
         Ok(Self {
             todo,
             todo_path,
             config_path,
         })
+    }
+
+    // Add new task in todo
+    pub fn add(&self, args: &[String]) {
+        if args.is_empty() {
+            eprintln!("Add option needs atlease 1 argument.");
+            exit(1);
+        }
+
+        // Write contents in todo.lst
+        let todo_file = OpenOptions::new()
+            .create(true)
+            .read(true)
+            .append(true)
+            .open(&self.todo_path)
+            .expect("Unable to open todo.lst.");
+        let mut buffer_writter = BufWriter::new(&todo_file);
+
+        for arg in args {
+            if arg.trim().is_empty() {
+                continue;
+            }
+
+            // Add \n to every task
+            let line: String = format!("{}\n", arg);
+
+            buffer_writter
+                .write_all(line.as_bytes())
+                .expect("Unable to write task in todo.lst.");
+        }
     }
 }

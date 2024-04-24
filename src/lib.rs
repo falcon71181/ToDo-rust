@@ -179,7 +179,7 @@ impl ToDo {
     }
 
     // sort all task asc
-    pub fn sort(&self) {
+    pub fn sort(&self, via: u8) {
         let todo_file = File::open(&self.todo_path).expect("Unable to open todo.lst.");
 
         // Read Buffer
@@ -192,7 +192,11 @@ impl ToDo {
             }
         }
         // sort todo_lst
-        todo_lst.sort();
+        if via == 0 {
+            todo_lst.sort();
+        } else if via == 1 {
+            todo_lst.sort_by(|a, b| b.cmp(a));
+        }
         let mut index = 1;
         for task in todo_lst {
             println!("{}: {}", index, task);

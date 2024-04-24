@@ -17,9 +17,12 @@ fn main() {
             "rm" => todo.rm(&args[1..]),
             "rm-all" => todo.rm_all(),
             "done" => println!("Done command"),
-            "sort" => todo.sort(),
-            "sort-done" => println!("Sort Done command"),
-            "sort-undone" => println!("Sort UnDone command"),
+            "sort" | "sort-asc" => todo.sort(0),
+            "sort-dsc" => todo.sort(1),
+            "sort-done" | "sort-done-asc" => println!("Sort Done command"),
+            "sort-done-dsc" => println!("Sort Done command dsc"),
+            "sort-undone" | "sort-undone-asc" => println!("Sort UnDone command"),
+            "sort-undone-dsc" => println!("Sort UnDone command dsc"),
             _ => println!("Help command"),
         }
     }

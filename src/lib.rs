@@ -81,4 +81,21 @@ impl ToDo {
                 .expect("Unable to write task in todo.lst.");
         }
     }
+
+    // List all tasks in todo
+    pub fn list(&self) {
+        // Open todo.lst to read
+        // BUG: OpenOptions::new() not working here
+        let todo_file = File::open(&self.todo_path).expect("Unable to open todo.lst.");
+        // Read buffer
+        let buffer_reader = BufReader::new(&todo_file);
+
+        let mut index = 1;
+        for line in buffer_reader.lines() {
+            if line.is_ok() {
+                println!("{}: {}", index, &line.unwrap());
+                index += 1;
+            }
+        }
+    }
 }

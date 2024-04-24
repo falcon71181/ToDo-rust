@@ -15,7 +15,7 @@ fn main() {
             "list-undone" => println!("List undone command"),
             "add" => todo.add(&args[1..]),
             "rm" => todo.rm(&args[1..]),
-            "rm-all" => println!("Remove all command"),
+            "rm-all" => todo.rm_all(),
             "done" => println!("Done command"),
             "sort" => println!("Sort all command"),
             "sort-done" => println!("Sort Done command"),

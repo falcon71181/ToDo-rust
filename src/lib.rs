@@ -1,5 +1,5 @@
 use std::fs::{File, OpenOptions};
-use std::io::{BufRead, BufReader, BufWriter, Write};
+use std::io::{self, BufRead, BufReader, BufWriter, Write};
 use std::path::Path;
 use std::path::PathBuf;
 use std::process::exit;
@@ -79,6 +79,7 @@ impl ToDo {
             buffer_writter
                 .write_all(line.as_bytes())
                 .expect("Unable to write task in todo.lst.");
+            // TODO: use colored to notify user
         }
     }
 
@@ -142,6 +143,38 @@ impl ToDo {
             buffer_writter
                 .write_all(line.as_bytes())
                 .expect("Unable to write to todo.lst.");
+        }
+    }
+
+    // Remove all tasks from todo.lst
+    pub fn rm_all(&self) {
+        let mut confirmation = String::new();
+        println!("Do you want to remove all tasks from todo ? (y/Y/yes/Yes/YES)");
+        io::stdin()
+            .read_line(&mut confirmation)
+            .expect("Unable to take confirmation.");
+
+        let confirm: Vec<String> = vec!["y".to_string(), "yes".to_string()];
+
+        // Convert input to lowercase and remove whitespace
+        let confirmation = confirmation.trim().to_lowercase();
+
+        if confirm.iter().any(|z| z == &confirmation) {
+            let todo_file = OpenOptions::new()
+                .write(true)
+                .truncate(true)
+                .create(true)
+                .open(&self.todo_path)
+                .expect("Unable to open todo.lst.");
+
+            let mut buffer_writer = BufWriter::new(&todo_file);
+            buffer_writer
+                .write_all("".as_bytes())
+                .expect("Unable to write to todo.lst.");
+            // TODO: use colored to notify user
+            println!("All task are removed from todo.lst.");
+        } else {
+            exit(1);
         }
     }
 }

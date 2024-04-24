@@ -5,13 +5,21 @@ use std::path::PathBuf;
 use std::process::exit;
 use xdg::BaseDirectories;
 
+// TODO: Add backup option (make use of todo/config.ini)
 pub struct ToDo {
     pub todo: Vec<String>,
     pub todo_path: PathBuf,
     pub config_path: PathBuf,
 }
 
+// TODO: make add to accept line-type tasks instead of one word
+// TODO: Add date and time
+// TODO: Add sort via date-time
+// TODO: make use of macros for open file with read or write permissions
+
 impl ToDo {
+    // TODO: make todo/config.ini usable
+    // TODO: Add config options to todo/config
     pub fn new() -> Result<Self, String> {
         let xdg_dir = BaseDirectories::with_prefix("ToDo").expect("Failed to get XDG directories.");
 

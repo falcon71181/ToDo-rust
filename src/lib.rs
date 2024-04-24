@@ -82,10 +82,10 @@ impl ToDo {
             }
 
             // Add \n to every task
-            let line: String = format!("{}\n", arg);
+            let line: String = format!("{}\n", &arg);
 
             buffer_writter
-                .write_all(line.as_bytes())
+                .write_all(&line.as_bytes())
                 .expect("Unable to write task in todo.lst.");
             // TODO: use colored to notify user
         }
@@ -102,7 +102,7 @@ impl ToDo {
         let mut index = 1;
         for line in buffer_reader.lines() {
             if line.is_ok() {
-                println!("{}: {}", index, &line.unwrap());
+                println!("{}: {}", &index, &line.unwrap());
                 index += 1;
             }
         }
@@ -130,6 +130,9 @@ impl ToDo {
         for line in buffer_reader.lines() {
             if !del_line_no.contains(&index) {
                 new_list.push(line.unwrap());
+            } else {
+                // TODO: use colored for better notification
+                println!("Removed {}: {}", &index, &line.unwrap());
             }
             index += 1;
         }
@@ -149,7 +152,7 @@ impl ToDo {
             // Add \n to every task
             let line: String = format!("{}\n", line);
             buffer_writter
-                .write_all(line.as_bytes())
+                .write_all(&line.as_bytes())
                 .expect("Unable to write to todo.lst.");
         }
     }
@@ -177,7 +180,7 @@ impl ToDo {
 
             let mut buffer_writer = BufWriter::new(&todo_file);
             buffer_writer
-                .write_all("".as_bytes())
+                .write_all(&"".as_bytes())
                 .expect("Unable to write to todo.lst.");
             // TODO: use colored to notify user
             println!("All task are removed from todo.lst.");
@@ -207,7 +210,7 @@ impl ToDo {
         }
         let mut index = 1;
         for task in todo_lst {
-            println!("{}: {}", index, task);
+            println!("{}: {}", &index, &task);
             index += 1;
         }
     }

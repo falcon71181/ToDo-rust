@@ -55,7 +55,7 @@ impl ToDo {
     // Add new task in todo
     pub fn add(&self, args: &[String]) {
         if args.is_empty() {
-            eprintln!("Add option needs atlease 1 argument.");
+            eprintln!("Add option needs atleast 1 argument.");
             exit(1);
         }
 
@@ -96,6 +96,52 @@ impl ToDo {
                 println!("{}: {}", index, &line.unwrap());
                 index += 1;
             }
+        }
+    }
+
+    // Remove a task from todo.lst
+    pub fn rm(&self, args: &[String]) {
+        if args.is_empty() {
+            eprintln!("rm option needs atleast 1 argument.");
+            exit(1);
+        }
+
+        let mut del_line_no: Vec<u64> =
+            args[..].iter().map(|z| z.parse::<u64>().unwrap()).collect();
+        del_line_no.sort();
+
+        // Open todo.lst to read
+        // BUG: OpenOptions::new() not working here
+        let mut todo_file = File::open(&self.todo_path).expect("Unable to open todo.lst.");
+        // Read Buffer
+        let buffer_reader = BufReader::new(&todo_file);
+
+        let mut new_list: Vec<String> = vec![];
+        let mut index: u64 = 1;
+        for line in buffer_reader.lines() {
+            if !del_line_no.contains(&index) {
+                new_list.push(line.unwrap());
+            }
+            index += 1;
+        }
+
+        // rewritting new_list to todo.lst
+        todo_file = OpenOptions::new()
+            .read(true)
+            .write(true)
+            .create(true)
+            .truncate(true)
+            .open(&self.todo_path)
+            .expect("Unable to open todo.lst.");
+        // Write Buffer
+        let mut buffer_writter = BufWriter::new(&todo_file);
+        // TODO: print removed tasks using colored
+        for line in new_list {
+            // Add \n to every task
+            let line: String = format!("{}\n", line);
+            buffer_writter
+                .write_all(line.as_bytes())
+                .expect("Unable to write to todo.lst.");
         }
     }
 }

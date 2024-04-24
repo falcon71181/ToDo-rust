@@ -17,7 +17,7 @@ fn main() {
             "rm" => todo.rm(&args[1..]),
             "rm-all" => todo.rm_all(),
             "done" => println!("Done command"),
-            "sort" => println!("Sort all command"),
+            "sort" => todo.sort(),
             "sort-done" => println!("Sort Done command"),
             "sort-undone" => println!("Sort UnDone command"),
             _ => println!("Help command"),

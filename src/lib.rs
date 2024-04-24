@@ -177,4 +177,26 @@ impl ToDo {
             exit(1);
         }
     }
+
+    // sort all task asc
+    pub fn sort(&self) {
+        let todo_file = File::open(&self.todo_path).expect("Unable to open todo.lst.");
+
+        // Read Buffer
+        let buffer_reader = BufReader::new(&todo_file);
+        let mut todo_lst: Vec<String> = vec![];
+
+        for line in buffer_reader.lines() {
+            if line.is_ok() {
+                todo_lst.push(line.unwrap());
+            }
+        }
+        // sort todo_lst
+        todo_lst.sort();
+        let mut index = 1;
+        for task in todo_lst {
+            println!("{}: {}", index, task);
+            index += 1;
+        }
+    }
 }

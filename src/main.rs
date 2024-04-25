@@ -2,6 +2,7 @@ use std::env;
 use todo::ToDo;
 
 fn main() {
+    // Testing commit :)
     let args: Vec<String> = env::args().skip(1).collect();
 
     let todo = ToDo::new().expect("Unable to create todo struct");

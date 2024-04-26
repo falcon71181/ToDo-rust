@@ -8,7 +8,6 @@ use xdg::BaseDirectories;
 
 // TODO: Add backup option (make use of todo/config.ini)
 pub struct ToDo {
-    pub todo: Vec<String>,
     pub todo_path: PathBuf,
     pub config_path: PathBuf,
 }
@@ -42,20 +41,7 @@ impl ToDo {
             File::create(&todo_path).expect("Failed to create ToDo lst file.");
         }
 
-        // Read contents of todo.lst
-        // BUG: OpenOptions::new() not working here
-        let todo_file = File::open(&todo_path).expect("Failed to open todo.lst.");
-        let buffer_reader = BufReader::new(&todo_file);
-        let mut todo: Vec<String> = vec![];
-
-        for line in buffer_reader.lines() {
-            if line.is_ok() {
-                todo.push(line.unwrap());
-            }
-        }
-
         Ok(Self {
-            todo,
             todo_path,
             config_path,
         })
@@ -113,7 +99,7 @@ impl ToDo {
                         Style::new().strikethrough().paint(task_details[0])
                     );
                 } else {
-                    println!("{}: {:?}", &index, &task_details[0].to_string());
+                    println!("{}: {}", &index, &task_details[0].to_string());
                 }
                 index += 1;
             }
@@ -121,7 +107,9 @@ impl ToDo {
     }
 
     // Completed a task from todo.lst
-    pub fn done_undone(&self, args: &[String], is_done: u8) {
+    // NOTE: 1 - done
+    // NOTE: 0 - undone
+    pub fn done_undone(&self, args: &[String], status_todo: u8) {
         if args.is_empty() {
             eprintln!("done option needs atleast 1 argument.");
             exit(1);
@@ -136,15 +124,14 @@ impl ToDo {
 
         let mut new_list: Vec<String> = Vec::new();
 
-        // XXX: idk whats happening here
-        let mut index: u64 = 0;
+        let mut index: u64 = 1;
         for line in buffer_reader.lines() {
             let line = line.unwrap();
-            if !done_line_no.contains(&index) {
+            if done_line_no.contains(&index) {
                 let mut task_details: Vec<&str> = line.split_whitespace().collect();
 
                 // Update the taak status
-                task_details[1] = if is_done == 1 { "1" } else { "0" };
+                task_details[1] = if status_todo == 1 { "1" } else { "0" };
 
                 let updated_line: String = format!(
                     "{} {}",
@@ -260,6 +247,8 @@ impl ToDo {
     }
 
     // sort all task asc
+    // NOTE: 0 - asc
+    // NOTE: 1 - dsc
     pub fn sort(&self, via: u8) {
         let todo_file = File::open(&self.todo_path).expect("Unable to open todo.lst.");
 

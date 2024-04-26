@@ -1,3 +1,4 @@
+use ansi_term::Style;
 use std::fs::{File, OpenOptions};
 use std::io::{self, BufRead, BufReader, BufWriter, Write};
 use std::path::Path;
@@ -82,7 +83,7 @@ impl ToDo {
             }
 
             // Add \n to every task
-            let line: String = format!("{}\n", &arg);
+            let line: String = format!("{} 0\n", &arg);
 
             buffer_writter
                 .write_all(&line.as_bytes())
@@ -101,10 +102,79 @@ impl ToDo {
 
         let mut index = 1;
         for line in buffer_reader.lines() {
-            if line.is_ok() {
-                println!("{}: {}", &index, &line.unwrap());
+            if let Ok(line) = line {
+                let task_details: Vec<&str> = line.split_whitespace().collect();
+                // TODO: make function return Result<boolean> and make task_status boolean
+                let task_status: u8 = task_details[1].parse::<u8>().unwrap_or(0);
+                if task_status == 1 {
+                    println!(
+                        "{}: {}",
+                        index,
+                        Style::new().strikethrough().paint(task_details[0])
+                    );
+                } else {
+                    println!("{}: {:?}", &index, &task_details[0].to_string());
+                }
                 index += 1;
             }
+        }
+    }
+
+    // Completed a task from todo.lst
+    pub fn done_undone(&self, args: &[String], is_done: u8) {
+        if args.is_empty() {
+            eprintln!("done option needs atleast 1 argument.");
+            exit(1);
+        }
+        let done_line_no: Vec<u64> = args[..].iter().map(|z| z.parse::<u64>().unwrap()).collect();
+
+        // Open todo.lst to read
+        // BUG: OpenOptions::new() not working here
+        let mut todo_file = File::open(&self.todo_path).expect("Unable to open todo.lst.");
+        // Read Buffer
+        let buffer_reader = BufReader::new(&todo_file);
+
+        let mut new_list: Vec<String> = Vec::new();
+
+        // XXX: idk whats happening here
+        let mut index: u64 = 0;
+        for line in buffer_reader.lines() {
+            let line = line.unwrap();
+            if !done_line_no.contains(&index) {
+                let mut task_details: Vec<&str> = line.split_whitespace().collect();
+
+                // Update the taak status
+                task_details[1] = if is_done == 1 { "1" } else { "0" };
+
+                let updated_line: String = format!(
+                    "{} {}",
+                    task_details[0].to_string(),
+                    task_details[1].to_string()
+                );
+                new_list.push(updated_line);
+            } else {
+                new_list.push(line);
+            }
+            index += 1;
+        }
+
+        // rewritting new_list to todo.lst
+        todo_file = OpenOptions::new()
+            .read(true)
+            .write(true)
+            .create(true)
+            .truncate(true)
+            .open(&self.todo_path)
+            .expect("Unable to open todo.lst.");
+        // Write Buffer
+        let mut buffer_writter = BufWriter::new(&todo_file);
+        // TODO: print removed tasks using colored
+        for line in new_list {
+            // Add \n to every task
+            let line: String = format!("{}\n", line);
+            buffer_writter
+                .write_all(&line.as_bytes())
+                .expect("Unable to write to todo.lst.");
         }
     }
 

@@ -1,4 +1,5 @@
 use ansi_term::Style;
+use regex::Regex;
 use std::fs::{File, OpenOptions};
 use std::io::{self, BufRead, BufReader, BufWriter, Write};
 use std::path::Path;
@@ -68,8 +69,12 @@ impl ToDo {
                 continue;
             }
 
+            // Remove one or more spaces and trim task
+            let re_multiple_spaces = Regex::new(r"\s+").unwrap();
+            let formated_task: String =
+                re_multiple_spaces.replace_all(&arg.trim(), "_").to_string();
             // Add \n to every task
-            let line: String = format!("{} 0\n", &arg);
+            let line: String = format!("{} 0\n", &formated_task);
 
             buffer_writter
                 .write_all(&line.as_bytes())
@@ -99,7 +104,11 @@ impl ToDo {
                         Style::new().strikethrough().paint(task_details[0])
                     );
                 } else {
-                    println!("{}: {}", &index, &task_details[0].to_string());
+                    println!(
+                        "{}: {}",
+                        &index,
+                        &task_details[0].to_string().replace("_", " ")
+                    );
                 }
                 index += 1;
             }

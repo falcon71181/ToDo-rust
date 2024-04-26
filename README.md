@@ -40,6 +40,7 @@ The following commands are available:
 - `rm <task_index>`: Removes the task at the specified index.
 - `rm-all`: Removes all tasks.
 - `done <task_index>`: Marks the task at the specified index as done.
+- `undone <task_index>`: Marks the task at the specified index as undone.
 - `sort` or `sort-asc`: Sorts the tasks in ascending order.
 - `sort-dsc`: Sorts the tasks in descending order.
 - `sort-done` or `sort-done-asc`: Sorts the completed tasks in ascending order.
@@ -57,6 +58,6 @@ The following commands are available:
 - **Config Options**: Add configuration options to `todo/config`.
 - **Separate Function**: Create a separate function for managing configuration options.
 - **Use Colored Output**: Utilize colored output for better notifications.
-  #### In the future, additional features such as support for displaying line numbers and handling more command-line arguments may be added.
+  #### In the future, additional features such as support handling more command-line arguments may be added.
 
 ---

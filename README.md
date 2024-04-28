@@ -28,8 +28,6 @@ cp target/release/todo /usr/local/bin
 ```
 
 ## Usage
-> [!NOTE]
-> Not every options are coded yet.
 
 The following commands are available:
 
@@ -51,7 +49,6 @@ The following commands are available:
 ## Future Improvements
 
 - **Backup Option**: Implement a backup option, utilizing a configuration file (`todo/config.ini`).
-- **Line-Type Tasks**: Modify the `add` command to accept tasks with multiple words.
 - **Date and Time**: Add functionality to include date and time for tasks.
 - **Sort by Date-Time**: Implement sorting functionality based on date and time.
 - **Macros for File Operations**: Utilize macros for file operations, such as opening files with read or write permissions.

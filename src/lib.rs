@@ -84,7 +84,7 @@ impl ToDo {
     }
 
     // List all tasks in todo
-    pub fn list(&self) {
+    pub fn list(&self, via_status: Option<u8>) {
         // Open todo.lst to read
         // BUG: OpenOptions::new() not working here
         let todo_file = File::open(&self.todo_path).expect("Unable to open todo.lst.");
@@ -97,18 +97,30 @@ impl ToDo {
                 let task_details: Vec<&str> = line.split_whitespace().collect();
                 // TODO: make function return Result<boolean> and make task_status boolean
                 let task_status: u8 = task_details[1].parse::<u8>().unwrap_or(0);
-                if task_status == 1 {
-                    println!(
-                        "{}: {}",
-                        index,
-                        Style::new().strikethrough().paint(task_details[0])
-                    );
-                } else {
-                    println!(
-                        "{}: {}",
-                        &index,
-                        &task_details[0].to_string().replace("_", " ")
-                    );
+
+                match via_status {
+                    Some(via) => {
+                        if via == 1 && task_status == 1 {
+                            println!("{}: {}", index, Style::new().paint(task_details[0]));
+                        } else if via == 0 && task_status == 0 {
+                            println!("{}: {}", index, Style::new().paint(task_details[0]));
+                        }
+                    }
+                    None => {
+                        if task_status == 1 {
+                            println!(
+                                "{}: {}",
+                                index,
+                                Style::new().strikethrough().paint(task_details[0])
+                            );
+                        } else {
+                            println!(
+                                "{}: {}",
+                                &index,
+                                &task_details[0].to_string().replace("_", " ")
+                            );
+                        }
+                    }
                 }
                 index += 1;
             }

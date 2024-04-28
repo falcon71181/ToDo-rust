@@ -15,7 +15,7 @@ fn main() {
             "list-undone" => todo.list(Some(0)),
             "add" => todo.add(&args[1..]),
             "rm" => todo.rm(&args[1..]),
-            "rm-all" => todo.rm_all(),
+            "rm-all" | "reset" => todo.rm_all(),
             "done" => todo.done_undone(&args[1..], 1),
             "undone" => todo.done_undone(&args[1..], 0),
             "sort" | "sort-asc" => todo.sort(0, None),
@@ -24,7 +24,9 @@ fn main() {
             "sort-done-dsc" => todo.sort(1, Some(1)),
             "sort-undone" | "sort-undone-asc" => todo.sort(0, Some(0)),
             "sort-undone-dsc" => todo.sort(1, Some(0)),
-            _ => println!("Help command"),
+            _ => todo.help(),
         }
+    } else {
+        todo.help();
     }
 }

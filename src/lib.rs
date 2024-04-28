@@ -301,6 +301,10 @@ impl ToDo {
             _ => println!("Configuration is incorrect."),
         }
     }
+
+    pub fn help(&self) {
+        println!("{}", USAGE_HELP);
+    }
 }
 
 // Helper functions
@@ -351,3 +355,64 @@ fn display_sorted(todo_lst: &Vec<String>, via_status: Option<u8>) -> () {
 fn sort_by_key(todo_lst: &mut Vec<String>, key: usize) -> () {
     todo_lst.sort_by_key(|line| line.split_whitespace().nth(key).unwrap_or("").to_owned());
 }
+
+// Help Usage
+const USAGE_HELP: &str = "Usage: todo [OPTIONS] [ARGUMENTS]
+Todo is a blazingly fast CLI program written in Rust.
+
+    - add [TASK/s]: Adds new task/s.
+        Example: todo add 'do at least 10 dynamic programming questions.'
+        Example: todo add task1 task2 task3
+        Example: todo add 'mine task1', 'mine task2', 'mine task3'
+    
+    - list | list-all: Lists all tasks.
+        Example: todo list
+        Example: todo list-all
+    
+    - list-done: Lists all completed tasks.
+        Example: todo list-done
+    
+    - list-undone: Lists all pending tasks.
+        Example: todo list-undone
+    
+    - done [INDEX KEY]: Marks task as completed.
+        Example: todo done 5 6
+    
+    - undone [INDEX KEY]: Marks task as pending.
+        Example: todo undone 5 6
+    
+    - rm [INDEX KEY]: Removes a task.
+        Example: todo rm 2 1 3
+    
+    - rm-all | reset: Removes all tasks.
+        Example: todo rm-all
+        Example: todo reset
+    
+    - sort: Sorts all tasks (default - ascending order).
+        Example: todo sort
+    
+    - sort-asc: Sorts all tasks in ascending order.
+        Example: todo sort-asc
+    
+    - sort-dsc: Sorts all tasks in descending order.
+        Example: todo sort-dsc
+    
+    - sort-done: Sorts all completed tasks (default - ascending order).
+        Example: todo sort-done
+    
+    - sort-done-asc: Sorts all completed tasks in ascending order.
+        Example: todo sort-done-asc
+    
+    - sort-done-dsc: Sorts all completed tasks in descending order.
+        Example: todo sort-done-dsc
+    
+    - sort-undone: Sorts all pending tasks (default - ascending order).
+        Example: todo sort-undone
+    
+    - sort-undone-asc: Sorts all pending tasks in ascending order.
+        Example: todo sort-undone-asc
+    
+    - sort-undone-dsc: Sorts all pending tasks in descending order.
+        Example: todo sort-undone-dsc
+    
+Report any bugs or issues at: https://github.com/falcon71181/ToDo-rust";

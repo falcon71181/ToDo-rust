@@ -10,9 +10,9 @@ fn main() {
         let command = &args[0];
 
         match &command[..] {
-            "list" | "list-all" => todo.list(),
-            "list-done" => println!("List done command"),
-            "list-undone" => println!("List undone command"),
+            "list" | "list-all" => todo.list(None),
+            "list-done" => todo.list(Some(1)),
+            "list-undone" => todo.list(Some(0)),
             "add" => todo.add(&args[1..]),
             "rm" => todo.rm(&args[1..]),
             "rm-all" => todo.rm_all(),

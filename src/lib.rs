@@ -268,30 +268,86 @@ impl ToDo {
     }
 
     // sort all task asc
-    // NOTE: 0 - asc
-    // NOTE: 1 - dsc
-    pub fn sort(&self, via: u8) {
+    // NOTE: via 0 - asc
+    // NOTE: via 1 - dsc
+    // NOTE: via_status 0 - undone
+    // NOTE: via_status 1 - done
+    pub fn sort(&self, via: u8, via_status: Option<u8>) {
         let todo_file = File::open(&self.todo_path).expect("Unable to open todo.lst.");
 
         // Read Buffer
         let buffer_reader = BufReader::new(&todo_file);
         let mut todo_lst: Vec<String> = vec![];
 
+        let mut index = 1;
         for line in buffer_reader.lines() {
             if line.is_ok() {
-                todo_lst.push(line.unwrap());
+                let formated_line = format!("{} {}", index, line.unwrap());
+                todo_lst.push(formated_line);
             }
-        }
-        // sort todo_lst
-        if via == 0 {
-            todo_lst.sort();
-        } else if via == 1 {
-            todo_lst.sort_by(|a, b| b.cmp(a));
-        }
-        let mut index = 1;
-        for task in todo_lst {
-            println!("{}: {}", &index, &task);
             index += 1;
         }
+        // sort todo_lst
+        match via {
+            0u8 => {
+                sort_by_key(&mut todo_lst, 1);
+                display_sorted(&todo_lst, via_status);
+            }
+            1u8 => {
+                sort_by_key(&mut todo_lst, 1);
+                todo_lst.reverse();
+                display_sorted(&todo_lst, via_status);
+            }
+            _ => println!("Configuration is incorrect."),
+        }
     }
+}
+
+// Helper functions
+
+// to display sorted List
+// NOTE: via_status means done or undone | Some(0) - undone, Some(1) - done
+fn display_sorted(todo_lst: &Vec<String>, via_status: Option<u8>) -> () {
+    for task in todo_lst {
+        // TODO: make function return Result<boolean> and make task_status boolean
+        let task_details: Vec<&str> = task.split_whitespace().collect();
+        let task_status: u8 = task_details[2].parse::<u8>().unwrap_or(0);
+        match via_status {
+            Some(via) => {
+                if via == 1 && task_status == 1 {
+                    println!(
+                        "{}: {}",
+                        task_details[0],
+                        Style::new().paint(task_details[1])
+                    );
+                } else if via == 0 && task_status == 0 {
+                    println!(
+                        "{}: {}",
+                        task_details[0],
+                        Style::new().paint(task_details[1])
+                    );
+                }
+            }
+            None => {
+                if task_status == 1 {
+                    println!(
+                        "{}: {}",
+                        task_details[0],
+                        Style::new().strikethrough().paint(task_details[1])
+                    )
+                } else if task_status == 0 {
+                    println!(
+                        "{}: {}",
+                        task_details[0],
+                        Style::new().paint(task_details[1])
+                    )
+                }
+            }
+        }
+    }
+}
+
+// to sort by specific key
+fn sort_by_key(todo_lst: &mut Vec<String>, key: usize) -> () {
+    todo_lst.sort_by_key(|line| line.split_whitespace().nth(key).unwrap_or("").to_owned());
 }

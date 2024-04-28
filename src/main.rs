@@ -18,12 +18,12 @@ fn main() {
             "rm-all" => todo.rm_all(),
             "done" => todo.done_undone(&args[1..], 1),
             "undone" => todo.done_undone(&args[1..], 0),
-            "sort" | "sort-asc" => todo.sort(0),
-            "sort-dsc" => todo.sort(1),
-            "sort-done" | "sort-done-asc" => println!("Sort Done command"),
-            "sort-done-dsc" => println!("Sort Done command dsc"),
-            "sort-undone" | "sort-undone-asc" => println!("Sort UnDone command"),
-            "sort-undone-dsc" => println!("Sort UnDone command dsc"),
+            "sort" | "sort-asc" => todo.sort(0, None),
+            "sort-dsc" => todo.sort(1, None),
+            "sort-done" | "sort-done-asc" => todo.sort(0, Some(1)),
+            "sort-done-dsc" => todo.sort(1, Some(1)),
+            "sort-undone" | "sort-undone-asc" => todo.sort(0, Some(0)),
+            "sort-undone-dsc" => todo.sort(1, Some(0)),
             _ => println!("Help command"),
         }
     }

@@ -206,11 +206,13 @@ impl ToDo {
         let mut new_list: Vec<String> = vec![];
         let mut index: u64 = 1;
         for line in buffer_reader.lines() {
+            let task_details = line.unwrap_or("".to_string());
             if !del_line_no.contains(&index) {
-                new_list.push(line.unwrap());
+                new_list.push(task_details);
             } else {
                 // TODO: use colored for better notification
-                println!("Removed {}: {}", &index, &line.unwrap());
+                let task = task_details.split_whitespace().nth(0).to_owned();
+                println!("Removed {}: {}", &index, &task.unwrap_or(""));
             }
             index += 1;
         }

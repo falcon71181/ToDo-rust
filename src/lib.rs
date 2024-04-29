@@ -1,3 +1,4 @@
+use ansi_term::Colour::{Blue, Cyan, Green, Purple, Red, Yellow};
 use ansi_term::Style;
 use regex::Regex;
 use std::fs::{File, OpenOptions};
@@ -79,7 +80,8 @@ impl ToDo {
             buffer_writter
                 .write_all(&line.as_bytes())
                 .expect("Unable to write task in todo.lst.");
-            // TODO: use colored to notify user
+
+            println!("{}: {}", Purple.bold().paint("Added"), arg.trim());
         }
     }
 
@@ -101,22 +103,30 @@ impl ToDo {
                 match via_status {
                     Some(via) => {
                         if via == 1 && task_status == 1 {
-                            println!("{}: {}", index, Style::new().paint(task_details[0]));
+                            println!(
+                                "{}: {}",
+                                Yellow.bold().italic().paint(&index.to_string()),
+                                Style::new().paint(task_details[0])
+                            );
                         } else if via == 0 && task_status == 0 {
-                            println!("{}: {}", index, Style::new().paint(task_details[0]));
+                            println!(
+                                "{}: {}",
+                                Blue.bold().italic().paint(&index.to_string()),
+                                Style::new().paint(task_details[0])
+                            );
                         }
                     }
                     None => {
                         if task_status == 1 {
                             println!(
                                 "{}: {}",
-                                index,
-                                Style::new().strikethrough().paint(task_details[0])
+                                Yellow.bold().italic().paint(&index.to_string()),
+                                Style::new().strikethrough().italic().paint(task_details[0])
                             );
                         } else {
                             println!(
                                 "{}: {}",
-                                &index,
+                                Blue.bold().italic().paint(&index.to_string()),
                                 &task_details[0].to_string().replace("_", " ")
                             );
                         }
@@ -159,6 +169,23 @@ impl ToDo {
                     task_details[0].to_string(),
                     task_details[1].to_string()
                 );
+
+                match status_todo {
+                    1 => println!(
+                        "{}: {}  : {}",
+                        Purple.bold().italic().paint(&index.to_string()),
+                        &task_details[0],
+                        Green.bold().paint("Completed ")
+                    ),
+                    0 => println!(
+                        "{}: {}  : {}",
+                        Purple.bold().italic().paint(&index.to_string()),
+                        &task_details[0],
+                        Cyan.bold().paint("UnDone 󰚭")
+                    ),
+                    _ => println!("{}", Red.paint("Configuration is wrong.")),
+                }
+
                 new_list.push(updated_line);
             } else {
                 new_list.push(line);
@@ -176,7 +203,6 @@ impl ToDo {
             .expect("Unable to open todo.lst.");
         // Write Buffer
         let mut buffer_writter = BufWriter::new(&todo_file);
-        // TODO: print removed tasks using colored
         for line in new_list {
             // Add \n to every task
             let line: String = format!("{}\n", line);
@@ -210,9 +236,13 @@ impl ToDo {
             if !del_line_no.contains(&index) {
                 new_list.push(task_details);
             } else {
-                // TODO: use colored for better notification
                 let task = task_details.split_whitespace().nth(0).to_owned();
-                println!("Removed {}: {}", &index, &task.unwrap_or(""));
+                println!(
+                    "{} {}: {}",
+                    Red.bold().paint("Removed"),
+                    Purple.bold().italic().paint(&index.to_string()),
+                    &task.unwrap_or("")
+                );
             }
             index += 1;
         }
@@ -227,7 +257,6 @@ impl ToDo {
             .expect("Unable to open todo.lst.");
         // Write Buffer
         let mut buffer_writter = BufWriter::new(&todo_file);
-        // TODO: print removed tasks using colored
         for line in new_list {
             // Add \n to every task
             let line: String = format!("{}\n", line);
@@ -240,7 +269,11 @@ impl ToDo {
     // Remove all tasks from todo.lst
     pub fn rm_all(&self) {
         let mut confirmation = String::new();
-        println!("Do you want to remove all tasks from todo ? (y/Y/yes/Yes/YES)");
+        println!(
+            "{}: Do you want to remove all tasks from todo ? {}",
+            Red.bold().paint("WARNING"),
+            Blue.bold().paint("(y/Y/yes/Yes/YES)")
+        );
         io::stdin()
             .read_line(&mut confirmation)
             .expect("Unable to take confirmation.");
@@ -262,8 +295,10 @@ impl ToDo {
             buffer_writer
                 .write_all(&"".as_bytes())
                 .expect("Unable to write to todo.lst.");
-            // TODO: use colored to notify user
-            println!("All task are removed from todo.lst.");
+            println!(
+                "{}",
+                Cyan.bold().paint("All task are removed from todo.lst.")
+            );
         } else {
             exit(1);
         }

@@ -1,7 +1,20 @@
 [package]
-name = "todo"
-version = "0.1.0"
+name = "todo-rust"
+version = "1.0.0"
 edition = "2021"
+categories = ["command-line-utilities", "command-line-interface"]
+description = "CLI program to manage todo list."
+documentation = "https://github.com/falcon71181/ToDo-rust/blob/master/README.md"
+readme = "README.md"
+authors = ["falcon71181"]
+keywords = ["cli", "todo"]
+repository = "https://github.com/falcon71181/ToDo-rust"
+license = "GPL-3.0"
+license-file = "LICENSE"
+
+[lib]
+name = "todo"           # The name of the target.
+path = "src/lib.rs"    # The source file of the target.
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

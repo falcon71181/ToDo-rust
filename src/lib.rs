@@ -119,15 +119,17 @@ impl ToDo {
                     None => {
                         if task_status == 1 {
                             println!(
-                                "{}: {}",
+                                "{}: {} {}",
                                 Yellow.bold().italic().paint(&index.to_string()),
-                                Style::new().strikethrough().italic().paint(task_details[0])
+                                Style::new().strikethrough().italic().paint(task_details[0]),
+                                Green.bold().paint("")
                             );
                         } else {
                             println!(
-                                "{}: {}",
+                                "{}: {} {}",
                                 Blue.bold().italic().paint(&index.to_string()),
-                                &task_details[0].to_string().replace("_", " ")
+                                &task_details[0].to_string().replace("_", " "),
+                                Cyan.bold().paint("󰚭")
                             );
                         }
                     }
@@ -358,13 +360,13 @@ fn display_sorted(todo_lst: &Vec<String>, via_status: Option<u8>) -> () {
                 if via == 1 && task_status == 1 {
                     println!(
                         "{}: {}",
-                        task_details[0],
+                        Yellow.bold().italic().paint(task_details[0]),
                         Style::new().paint(task_details[1])
                     );
                 } else if via == 0 && task_status == 0 {
                     println!(
                         "{}: {}",
-                        task_details[0],
+                        Blue.bold().italic().paint(task_details[0]),
                         Style::new().paint(task_details[1])
                     );
                 }
@@ -372,16 +374,18 @@ fn display_sorted(todo_lst: &Vec<String>, via_status: Option<u8>) -> () {
             None => {
                 if task_status == 1 {
                     println!(
-                        "{}: {}",
-                        task_details[0],
-                        Style::new().strikethrough().paint(task_details[1])
-                    )
-                } else if task_status == 0 {
+                        "{}: {} {}",
+                        Yellow.bold().italic().paint(task_details[0]),
+                        Style::new().strikethrough().italic().paint(task_details[1]),
+                        Green.bold().paint("")
+                    );
+                } else {
                     println!(
-                        "{}: {}",
-                        task_details[0],
-                        Style::new().paint(task_details[1])
-                    )
+                        "{}: {} {}",
+                        Blue.bold().italic().paint(task_details[0]),
+                        &task_details[1].to_string().replace("_", " "),
+                        Cyan.bold().paint("󰚭")
+                    );
                 }
             }
         }

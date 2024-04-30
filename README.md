@@ -24,7 +24,7 @@ cargo build --release
 After successful compilation, you can copy the executable to a directory in your PATH, for example:
 
 ```bash
-cp target/release/todo /usr/local/bin
+cp target/release/todo-rust /usr/local/bin/todo
 ```
 
 ## Usage

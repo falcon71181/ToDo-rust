@@ -1,9 +1,8 @@
 use ansi_term::Colour::{Blue, Cyan, Green, Purple, Red, Yellow};
 use ansi_term::Style;
 use regex::Regex;
-use std::fs::{File, OpenOptions};
+use std::fs::{create_dir_all, File, OpenOptions};
 use std::io::{self, BufRead, BufReader, BufWriter, Write};
-use std::path::Path;
 use std::path::PathBuf;
 use std::process::exit;
 use xdg::BaseDirectories;
@@ -23,25 +22,20 @@ impl ToDo {
     // TODO: make todo/config.ini usable
     // TODO: Add config options to todo/config
     pub fn new() -> Result<Self, String> {
-        let xdg_dir = BaseDirectories::with_prefix("ToDo").expect("Failed to get XDG directories.");
+        let xdg_dir = BaseDirectories::with_prefix("ToDo")
+            .map_err(|e| format!("Failed to get XDG directories: {}", e))?;
 
         let config_path = xdg_dir
             .place_config_file("config.ini")
-            .expect("Unable to create Config file.");
+            .map_err(|e| format!("Unable to create Config file: {}", e))?;
 
-        // TODO: create a separate function to do this work
-        if !Path::new(&config_path.as_path()).exists() {
-            File::create(&config_path).expect("Failed to create Config file.");
-        }
+        create_file_if_not_exists(&config_path)?;
 
         let todo_path = xdg_dir
             .place_config_file("todo.lst")
-            .expect("Unable to create ToDo lst file.");
+            .map_err(|e| format!("Unable to create ToDo lst file: {}", e))?;
 
-        // TODO: create a separate function to do this work
-        if !Path::new(&todo_path.as_path()).exists() {
-            File::create(&todo_path).expect("Failed to create ToDo lst file.");
-        }
+        create_file_if_not_exists(&todo_path)?;
 
         Ok(Self {
             todo_path,
@@ -347,6 +341,20 @@ impl ToDo {
 }
 
 // Helper functions
+
+// create file if not exists
+fn create_file_if_not_exists(path: &PathBuf) -> Result<(), String> {
+    if !path.exists() {
+        let parent_dir = path
+            .parent()
+            .ok_or_else(|| format!("Failed to get parent directory of {:?}", path))?;
+
+        create_dir_all(parent_dir).map_err(|e| format!("Failed to create directory: {:?}", e))?;
+
+        File::create(path).map_err(|e| format!("Failed to create file: {:?}", e))?;
+    }
+    Ok({})
+}
 
 // to display sorted List
 // NOTE: via_status means done or undone | Some(0) - undone, Some(1) - done

@@ -46,36 +46,39 @@ impl ToDo {
     // Add new task in todo
     pub fn add(&self, args: &[String]) {
         if args.is_empty() {
-            eprintln!("Add option needs atleast 1 argument.");
-            exit(1);
+            eprintln!("Add option needs at least 1 argument.");
+            return;
         }
 
-        // Write contents in todo.lst
         let todo_file = OpenOptions::new()
             .create(true)
             .read(true)
             .append(true)
-            .open(&self.todo_path)
-            .expect("Unable to open todo.lst.");
-        let mut buffer_writter = BufWriter::new(&todo_file);
-
-        for arg in args {
-            if arg.trim().is_empty() {
-                continue;
+            .open(&self.todo_path);
+        let mut buffer_writer = match todo_file {
+            Ok(file) => BufWriter::new(file),
+            Err(err) => {
+                eprintln!("Unable to open todo.lst: {}", err);
+                return;
             }
+        };
 
-            // Remove one or more spaces and trim task
-            let re_multiple_spaces = Regex::new(r"\s+").unwrap();
-            let formated_task: String =
-                re_multiple_spaces.replace_all(&arg.trim(), "_").to_string();
-            // Add \n to every task
-            let line: String = format!("{} 0\n", &formated_task);
+        let re_multiple_spaces = Regex::new(r"\s+").expect("Failed to compile regex pattern");
+        for arg in args {
+            let formatted_task = re_multiple_spaces.replace_all(arg.trim(), "_").to_string();
+            if !formatted_task.is_empty() {
+                let line = format!("{} 0\n", formatted_task);
 
-            buffer_writter
-                .write_all(&line.as_bytes())
-                .expect("Unable to write task in todo.lst.");
+                if let Err(err) = buffer_writer.write_all(line.as_bytes()) {
+                    eprintln!("Failed to write task in todo.lst: {}", err);
+                    return;
+                }
+                println!("{}: {}", Purple.bold().paint("Added"), arg.trim());
+            }
+        }
 
-            println!("{}: {}", Purple.bold().paint("Added"), arg.trim());
+        if let Err(err) = buffer_writer.flush() {
+            eprintln!("Failed to flush buffer: {}", err);
         }
     }
 

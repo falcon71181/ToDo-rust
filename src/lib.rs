@@ -1,9 +1,8 @@
 use ansi_term::Colour::{Blue, Cyan, Green, Purple, Red, Yellow};
 use ansi_term::Style;
 use regex::Regex;
-use std::fs::{File, OpenOptions};
+use std::fs::{create_dir_all, File, OpenOptions};
 use std::io::{self, BufRead, BufReader, BufWriter, Write};
-use std::path::Path;
 use std::path::PathBuf;
 use std::process::exit;
 use xdg::BaseDirectories;
@@ -23,25 +22,20 @@ impl ToDo {
     // TODO: make todo/config.ini usable
     // TODO: Add config options to todo/config
     pub fn new() -> Result<Self, String> {
-        let xdg_dir = BaseDirectories::with_prefix("ToDo").expect("Failed to get XDG directories.");
+        let xdg_dir = BaseDirectories::with_prefix("ToDo")
+            .map_err(|e| format!("Failed to get XDG directories: {}", e))?;
 
         let config_path = xdg_dir
             .place_config_file("config.ini")
-            .expect("Unable to create Config file.");
+            .map_err(|e| format!("Unable to create Config file: {}", e))?;
 
-        // TODO: create a separate function to do this work
-        if !Path::new(&config_path.as_path()).exists() {
-            File::create(&config_path).expect("Failed to create Config file.");
-        }
+        create_file_if_not_exists(&config_path)?;
 
         let todo_path = xdg_dir
             .place_config_file("todo.lst")
-            .expect("Unable to create ToDo lst file.");
+            .map_err(|e| format!("Unable to create ToDo lst file: {}", e))?;
 
-        // TODO: create a separate function to do this work
-        if !Path::new(&todo_path.as_path()).exists() {
-            File::create(&todo_path).expect("Failed to create ToDo lst file.");
-        }
+        create_file_if_not_exists(&todo_path)?;
 
         Ok(Self {
             todo_path,
@@ -52,36 +46,39 @@ impl ToDo {
     // Add new task in todo
     pub fn add(&self, args: &[String]) {
         if args.is_empty() {
-            eprintln!("Add option needs atleast 1 argument.");
-            exit(1);
+            eprintln!("Add option needs at least 1 argument.");
+            return;
         }
 
-        // Write contents in todo.lst
         let todo_file = OpenOptions::new()
             .create(true)
             .read(true)
             .append(true)
-            .open(&self.todo_path)
-            .expect("Unable to open todo.lst.");
-        let mut buffer_writter = BufWriter::new(&todo_file);
-
-        for arg in args {
-            if arg.trim().is_empty() {
-                continue;
+            .open(&self.todo_path);
+        let mut buffer_writer = match todo_file {
+            Ok(file) => BufWriter::new(file),
+            Err(err) => {
+                eprintln!("Unable to open todo.lst: {}", err);
+                return;
             }
+        };
 
-            // Remove one or more spaces and trim task
-            let re_multiple_spaces = Regex::new(r"\s+").unwrap();
-            let formated_task: String =
-                re_multiple_spaces.replace_all(&arg.trim(), "_").to_string();
-            // Add \n to every task
-            let line: String = format!("{} 0\n", &formated_task);
+        let re_multiple_spaces = Regex::new(r"\s+").expect("Failed to compile regex pattern");
+        for arg in args {
+            let formatted_task = re_multiple_spaces.replace_all(arg.trim(), "_").to_string();
+            if !formatted_task.is_empty() {
+                let line = format!("{} 0\n", formatted_task);
 
-            buffer_writter
-                .write_all(&line.as_bytes())
-                .expect("Unable to write task in todo.lst.");
+                if let Err(err) = buffer_writer.write_all(line.as_bytes()) {
+                    eprintln!("Failed to write task in todo.lst: {}", err);
+                    return;
+                }
+                println!("{}: {}", Purple.bold().paint("Added"), arg.trim());
+            }
+        }
 
-            println!("{}: {}", Purple.bold().paint("Added"), arg.trim());
+        if let Err(err) = buffer_writer.flush() {
+            eprintln!("Failed to flush buffer: {}", err);
         }
     }
 
@@ -347,6 +344,20 @@ impl ToDo {
 }
 
 // Helper functions
+
+// create file if not exists
+fn create_file_if_not_exists(path: &PathBuf) -> Result<(), String> {
+    if !path.exists() {
+        let parent_dir = path
+            .parent()
+            .ok_or_else(|| format!("Failed to get parent directory of {:?}", path))?;
+
+        create_dir_all(parent_dir).map_err(|e| format!("Failed to create directory: {:?}", e))?;
+
+        File::create(path).map_err(|e| format!("Failed to create file: {:?}", e))?;
+    }
+    Ok({})
+}
 
 // to display sorted List
 // NOTE: via_status means done or undone | Some(0) - undone, Some(1) - done
